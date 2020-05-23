@@ -1,0 +1,10 @@
+{
+    "autoload-dev": {
+        "psr-4": {
+            "TryGuessingIt\\": "bin/src"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

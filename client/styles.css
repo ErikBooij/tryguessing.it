@@ -1,0 +1,23 @@
+@tailwind base;
+
+@tailwind components;
+
+@tailwind utilities;
+
+.animate-slide-right-infinite {
+    animation: ease-in-out infinite;
+    animation-name: slide-right;
+    animation-duration: 1.2s;
+    position: absolute;
+}
+
+@keyframes slide-right {
+    0% {
+        left: -20%;
+        padding-right: 0;
+    }
+    100% {
+        left: 110%;
+        padding-right: 100%;
+    }
+}

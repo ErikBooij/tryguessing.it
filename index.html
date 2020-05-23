@@ -1,0 +1,286 @@
+<!doctype html>
+<html class="h-full">
+<head>
+    <title>TryGuessing.It - A Simple Geolocation Game</title>
+    <link rel="stylesheet" href="client/styles.css">
+    <script src="client/script/game.ts" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.3.1/css/ol.css" type="text/css">
+</head>
+<body class="h-full bg-gray-100 flex items-center justify-center">
+<div class="js-game-settings-view bg-white overflow-hidden overflow-hidden shadow rounded-lg max-w-3xl w-full m-4">
+    <div class="bg-white px-4 py-5 border-b border-gray-200 sm:px-6">
+        <div class="-ml-4 -mt-4 flex justify-between items-center flex-wrap sm:flex-no-wrap">
+            <div class="ml-4 mt-4">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">
+                    TryGuessing.<span class="text-gray-500">It</span>
+                </h3>
+                <p class="mt-1 text-sm leading-5 text-gray-500">
+                    Choose your difficulty and start a game. Simple as that.
+                </p>
+            </div>
+            <div class="ml-4 mt-4 flex-shrink-0">
+                <span class="inline-flex rounded-md shadow-sm">
+                    <button type="submit" class="js-start-game relative inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:shadow-outline-blue focus:border-blue-700 active:bg-blue-700">
+                        Start Game
+                    </button>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="px-4 py-4 sm:px-6">
+        <form>
+            <div class="grid gap-6">
+                <div>
+                    <label for="granularity" class="block text-sm font-medium leading-5 text-gray-700">Granularity</label>
+                    <select id="granularity" class="js-setting-granularity mt-1 block form-select w-full py-2 px-3 py-0 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5">
+                        <option value="country">Country</option>
+                        <option value="city">City</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="difficulty" class="block text-sm font-medium leading-5 text-gray-700">Difficulty</label>
+                    <select id="difficulty" class="js-setting-difficulty mt-1 block form-select w-full py-2 px-3 py-0 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5">
+                        <option value="easy">Easy</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="number_of_questions" class="block text-sm font-medium leading-5 text-gray-700">Number of Questions</label>
+                    <div class="flex">
+                        <input id="number_of_questions" type="number" value="20" pattern="\d*" inputmode="numeric" class="js-setting-question-count mt-1 form-input block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"/>
+                        <div class="flex items-center ml-4">
+                            <input id="unlimited-questions" name="form-input" type="checkbox" class="js-setting-unlimited-questions form-checkbox h-4 w-4 text-blue-600 transition duration-150 ease-in-out">
+                            <label for="unlimited-questions" class="ml-3">
+                                <span class="block text-sm leading-5 font-medium text-gray-700">Unlimited</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="time_limit" class="block text-sm font-medium leading-5 text-gray-700">Time Limit</label>
+                    <select id="time_limit" class="js-setting-time-limit mt-1 block form-select w-full py-2 px-3 py-0 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5">
+                        <option value="short">Short (5s)</option>
+                        <option value="medium">Medium (10s)</option>
+                        <option value="hard">Long (30s)</option>
+                        <option value="unlimited" selected>Unlimited</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="js-loading-view bg-white overflow-hidden overflow-hidden shadow rounded-lg max-w-3xl w-full m-4 hidden">
+    <div class="bg-white px-4 py-5 border-b border-gray-200 sm:px-6">
+        <div class="-ml-4 -mt-4 flex justify-between items-center flex-wrap sm:flex-no-wrap">
+            <div class="ml-4 mt-4">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">
+                    Loading game data...
+                </h3>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white px-4 py-5 border-b border-gray-200 sm:px-6">
+        <div class="js-loading-indicator h-6 bg-gray-100 overflow-hidden relative"></div>
+    </div>
+</div>
+<div class="js-game-view bg-white overflow-hidden overflow-hidden shadow rounded-lg max-w-3xl w-full m-4 hidden">
+    <div class="bg-white px-4 py-5 border-b border-gray-200 sm:px-6">
+        <div class="-ml-4 -mt-4 flex justify-between items-center flex-wrap sm:flex-no-wrap">
+            <div class="ml-4 mt-4">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">
+                    TryGuessing.<span class="text-gray-500">It</span>
+                </h3>
+                <p class="mt-1 text-sm leading-5 text-gray-500">
+                    Simply pick where you think these coordinates are located.
+                </p>
+            </div>
+            <div class="ml-4 mt-4 flex-shrink-0">
+                <span class="inline-flex rounded-md shadow-sm">
+                    <button type="submit" class="js-start-game relative inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-red-700 hover:bg-red-600 focus:outline-none focus:shadow-outline-red focus:border-red-700 active:bg-red-700">
+                        End Game
+                    </button>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <form>
+        <div class="grid gap-6">
+            <div class="js-game-stats">
+                <div class="grid grid-cols-3 gap-5 border-b border-gray-200">
+                    <div class="overflow-hidden">
+                        <div class="p-3 sm:p-6">
+                            <dl>
+                                <dt class="text-sm leading-5 font-medium text-gray-500 truncate">
+                                    Answered
+                                </dt>
+                                <dd class="js-question-progress mt-1 text-xl sm:text-3xl leading-9 font-semibold text-gray-900">
+                                    0 / &infin;
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                    <div class="overflow-hidden">
+                        <div class="p-3 sm:p-6">
+                            <dl>
+                                <dt class="text-sm leading-5 font-medium text-gray-500 truncate">
+                                    Correct
+                                </dt>
+                                <dd class="mt-1 text-xl sm:text-3xl leading-9 font-semibold text-gray-900">
+                                    <span class="js-correct-progress">1</span> <span class="js-correct-percentage-progress text-sm sm:text-xl text-gray-700">(58.16%)</span>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                    <div class="overflow-hidden">
+                        <div class="p-3 sm:p-6">
+                            <dl>
+                                <dt class="text-sm leading-5 font-medium text-gray-500 truncate">
+                                    Avg. Time
+                                </dt>
+                                <dd class="js-time-progress mt-1 text-xl sm:text-3xl leading-9 font-semibold text-gray-900">
+                                    -
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <dl class=" sm:grid sm:grid-cols-2">
+                <div class="flex flex-col border-b border-gray-100 p-3 md:p-6 text-center sm:border-0 sm:border-r">
+                    <dt class="order-2 md:mt-2 text-lg leading-6 font-medium text-gray-500" id="item-1">
+                        Latitude
+                    </dt>
+                    <dd class="js-question-lat order-1 text-4xl md:text-5xl leading-none font-extrabold text-blue-600" aria-describedby="item-1">
+                        53.45678
+                    </dd>
+                </div>
+                <div class="flex flex-col border-t border-gray-100 p-3 md:p-6 text-center sm:border-0 sm:border-l">
+                    <dt class="order-2 md:mt-2 text-lg leading-6 font-medium text-gray-500">
+                        Longitude
+                    </dt>
+                    <dd class="js-question-lng order-1 text-4xl md:text-5xl leading-none font-extrabold text-blue-600">
+                        6.58758
+                    </dd>
+                </div>
+            </dl>
+            <div class="js-options justify-around border-t border-gray-200 p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6">
+                <button type="button" data-answer-index="1" class="js-answer-button-1 inline-flex items-center px-6 py-3 border border-gray-300 text-base leading-6 font-medium rounded-md text-gray-700 bg-white hover:bg-blue-500 hover:text-gray-100 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:text-gray-800 active:bg-gray-50">
+                    <span class="text-gray-300">
+                        <svg class="-ml-1 mr-3 h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                        </svg>
+                    </span>
+                    <span class="js-answer-1">Netherlands</span>
+                </button>
+                <button type="button" data-answer-index="2" class="js-answer-button-2 inline-flex items-center px-6 py-3 border border-gray-300 text-base leading-6 font-medium rounded-md text-gray-700 bg-white hover:bg-blue-500 hover:text-gray-100 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:text-gray-800 active:bg-gray-50">
+                    <span class="text-gray-300">
+                        <svg class="-ml-1 mr-3 h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                        </svg>
+                    </span>
+                    <span class="js-answer-2">Belgium</span>
+                </button>
+                <button type="button" data-answer-index="3" class="js-answer-button-3 inline-flex items-center px-6 py-3 border border-gray-300 text-base leading-6 font-medium rounded-md text-gray-700 bg-white hover:bg-blue-500 hover:text-gray-100 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:text-gray-800 active:bg-gray-50">
+                    <span class="text-gray-300">
+                        <svg class="-ml-1 mr-3 h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                        </svg>
+                    </span>
+                    <span class="js-answer-3">Germany</span>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="js-map-view bg-white overflow-hidden overflow-hidden shadow rounded-lg max-w-3xl w-full m-4 hidden">
+    <div class="bg-white px-4 py-5 border-b border-gray-200 sm:px-6">
+        <div class="-ml-4 -mt-4 flex justify-between items-center flex-wrap sm:flex-no-wrap">
+            <div class="ml-4 mt-4">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">
+                    That guess was <span class="js-answer-right text-green-500 font-bold">CORRECT</span><span class="js-answer-wrong text-red-700 font-bold">WRONG</span><span class="js-answer-late text-blue-700 font-bold">LATE</span>
+                </h3>
+                <p class="js-wrong-answer-distance mt-1 text-sm leading-5 text-gray-500">
+                    The answer was <span class="js-wrong-answer-correction font-bold"></span>.
+                    <span class="js-wrong-answer-details">
+                        <br />
+                        You said <span class="js-wrong-answer-given font-bold"></span>.<br />
+                        That's only <span class="js-wrong-answer-distance-km">4,321km</span> / <span class="js-wrong-answer-distance-mi">2,843mi</span> away <span class="js-wrong-answer-distance-emoji">👏</span>
+                    </span>
+                </p>
+            </div>
+            <div class="ml-4 mt-4 flex-shrink-0">
+                <span class="inline-flex rounded-md shadow-sm">
+                    <button type="submit" class="js-map-continue-game relative inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-blue-700 hover:bg-blue-600 focus:outline-none focus:shadow-outline-blue focus:border-blue-700 active:bg-blue-700">
+                        Continue
+                    </button>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid gap-6">
+        <div class="js-game-map h-72">
+        </div>
+    </div>
+</div>
+<div class="js-results-view bg-white overflow-hidden overflow-hidden shadow rounded-lg max-w-3xl w-full m-4 hidden">
+    <div class="bg-white px-4 py-5 border-b border-gray-200 sm:px-6">
+        <div class="-ml-4 -mt-4 flex justify-between items-center flex-wrap sm:flex-no-wrap">
+            <div class="ml-4 mt-4">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">
+                    Your results.
+                </h3>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white px-4 py-5 border-b border-gray-200 sm:px-6">
+        <div class="flex flex-col">
+            <div class="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+                <div class="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
+                    <table class="min-w-full">
+                        <thead>
+                        <tr>
+                            <th class="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                Date
+                            </th>
+                            <th class="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                Correct
+                            </th>
+                            <th class="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                                Avg. Time
+                            </th>
+                            <th class="px-6 py-3 border-b border-gray-200 bg-gray-50"></th>
+                        </tr>
+                        <template class="js-result-template">
+                            <tr>
+                                <td class="js-result-template-date px-6 py-4 whitespace-no-wrap border-b border-gray-200 text-sm leading-5 font-medium text-gray-900">
+                                    Today (5.45pm)
+                                </td>
+                                <td class="js-result-template-correct px-6 py-4 whitespace-no-wrap border-b border-gray-200 text-sm leading-5 text-gray-500">
+                                    18/20 (96.00%)
+                                </td>
+                                <td class="js-result-template-average-time px-6 py-4 whitespace-no-wrap border-b border-gray-200 text-sm leading-5 text-gray-500">
+                                    4.84s
+                                </td>
+                                <td class="px-6 py-4 whitespace-no-wrap text-right border-b border-gray-200 text-sm leading-5 font-medium">
+                                    <a href="#" class="js-result-template-delete text-indigo-600 hover:text-indigo-900">Delete</a>
+                                </td>
+                            </tr>
+                        </template>
+                        </thead>
+                        <tbody class="js-result-list bg-white">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
